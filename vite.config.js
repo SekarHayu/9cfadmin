@@ -24,5 +24,8 @@ export default defineConfig(({ mode }) => {
         '@': fileURLToPath(new URL('./src', import.meta.url))
       },
     },
+    preview: {
+      allowedHosts: ['localhost', 'admin.chemicfest9.site']
+    }
   };
 });
