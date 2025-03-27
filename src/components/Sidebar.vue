@@ -2,8 +2,10 @@
     <aside :class="`${is_expanded && 'is-expanded'}`">
         <div class="logo">
             <img src="../pict/logocf.jpeg" alt="logo">
+            <h3 class="title pt-3 text-bold">ADMIN CF#9</h3>
         </div>
 
+        
         <div class="menu-toggle-wrap">
             <button class="menu-toggle" @click="ToggleMenu">
                 <span class="material-icons">keyboard_double_arrow_right</span>
@@ -24,9 +26,9 @@
                 <span class="material-icons">receipt</span>
                 <span class="text">Data Tiket</span>
             </router-link>
-            <router-link class="button" to="/email">
-                <span class="material-icons">email</span>
-                <span class="text">Email</span>
+            <router-link class="button" to="/edit">
+                <span class="material-icons">edit</span>
+                <span class="text">Edit Tiket</span>
             </router-link>
         </div>
 
@@ -34,8 +36,8 @@
 
         <div class="menu">
             <router-link class="button" to="/settings">
-                <span class="material-icons">settings</span>
-                <span class="text">Settings</span>
+                <span class="material-icons">call</span>
+                <span class="text">Help</span>
             </router-link>
         </div>
     </aside>
@@ -56,6 +58,7 @@ const ToggleMenu =  () => {
 
 <style lang="scss" scoped>
 aside{
+    position: fixed;
     display: flex;
     flex-direction: column;
     width: calc(2rem + 32px);
@@ -73,10 +76,23 @@ aside{
     }
 
     .logo{
+        display: flex;
+        align-items: center;
+        gap: 0.5rem; 
+        white-space: nowrap; // Mencegah teks turun ke bawah
         margin-bottom: 1rem;
 
-        img{
-            width: 2rem;
+        img {
+            width: 2rem; 
+            flex-shrink: 0; // Supaya tidak mengecil saat sidebar diperluas
+        }
+
+        .title {
+            opacity: 0;
+            transition: opacity 0.3s ease-out;
+            overflow: hidden;
+            white-space: nowrap;
+            max-width: 0; // Default disembunyikan
         }
     }
 
@@ -157,9 +173,16 @@ aside{
 
     &.is-expanded {
         width: var(--sidebar-width);
+
+        .logo .title {
+            font-weight: bold;
+            font-size:larger;
+            opacity: 1;
+            max-width: 100%; // Biarkan teks muncul normal
+        }
         
         .menu-toggle-wrap {
-            top: -3rem;
+            top: -4rem;
             .menu-toggle {
                 transform: rotate(-180deg);
             }

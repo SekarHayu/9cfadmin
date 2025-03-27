@@ -17,13 +17,12 @@ const router = createRouter({
             component: () => import('../views/Ticket.vue')
         },
         {
-            path: '/email',
-            component: () => import('../views/Email.vue')
-        },
-        {
+            path: '/edit',
+            component: () => import('../views/Edit.vue')
+        },{
             path: '/settings',
             component: () => import('../views/Settings.vue')
-        }
+        },
     ]
 })
 

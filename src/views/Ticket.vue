@@ -1,85 +1,120 @@
-<template>
-    <div class="container mx-auto p-4">
-      <h1 class="text-2xl font-bold mb-4">Daftar Tiket Peserta</h1>
-  
-      
+  <template>
+      <div class="h-screen items-center w-screen md:w-screen md:items-center md:justify-center sm:justify-center sm:p-32 pl-24 p-8 pb-24  "> 
+        <h1 class="text-2xl font-bold mb-4">Daftar Tiket Peserta</h1>
+    
+        
+    
+        <div class="overflow-x-auto">
+          <table class="w-full border-collapse border text-sm md:text-base">
+            <thead>
+              <tr class="bg-gray-100">
+          <th class="border p-2">Email</th>
+          <th class="border p-2">ID</th>
+          <th class="border p-2">Booking Code</th>
+          <th class="border p-2">Scanned</th>
+          <th class="border p-2">Ticket ID</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="ticket in tickets" :key="ticket.id">
+          <td class="border p-2">{{ ticket.email }}</td>
+          <td class="border p-2">{{ ticket.id }}</td>
+          <td class="border p-2">{{ ticket.bookingCode }}</td>
+          <td class="border p-2">{{ ticket.scanned ? '✅' : '❌' }}</td>
+          <td class="border p-2">{{ ticket.ticketId }}</td>
+        </tr>
+      </tbody>
+        </table>
+
+        <h1 class="text-2xl pt-12 font-bold mb-4">Manual Ticket Scan</h1>
+    
+    <div class="bg-white p-6 rounded-lg shadow-md md:w-96">
       <input 
+        v-model="bookingCode" 
         type="text" 
-        v-model="searchQuery" 
-        placeholder="Cari Nama Peserta atau Nomor Tiket..." 
-        class="w-full p-2 border rounded mb-4"
+        placeholder="Masukkan Booking Code" 
+        class="border p-2 w-full rounded-md focus:ring focus:ring-blue-200"
       />
-  
       
-      <table class="w-full border-collapse border">
-        <thead>
-          <tr class="bg-gray-200">
-            <th class="border p-2">Nomor Tiket</th>
-            <th class="border p-2">Nama Peserta</th>
-            <th class="border p-2">Jenis Tiket</th>
-            <th class="border p-2">Tanggal Pembelian</th>
-            <th class="border p-2">Status</th>
-            <th class="border p-2">Aksi</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(ticket, index) in filteredTickets" :key="index">
-            <td class="border p-2">{{ ticket.nomor }}</td>
-            <td class="border p-2">{{ ticket.nama }}</td>
-            <td class="border p-2">{{ ticket.jenis }}</td>
-            <td class="border p-2">{{ ticket.tanggal }}</td>
-            <td class="border p-2">
-              <span :class="ticket.status === 'Aktif' ? 'text-green-500' : 'text-red-500'">
-                {{ ticket.status }}
-              </span>
-            </td>
-            <td class="border p-2 flex gap-2">
-              <button @click="editTicket(ticket)" class="bg-blue-500 text-white px-2 py-1 rounded">Edit</button>
-              <button @click="deleteTicket(index)" class="bg-red-500 text-white px-2 py-1 rounded">Hapus</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <button 
+        @click="scanTicket" 
+        :disabled="loading || !bookingCode" 
+        class="mt-4 bg-blue-500 text-white px-4 py-2 rounded-md w-full hover:bg-blue-600 disabled:bg-gray-300"
+      >
+        {{ loading ? "Scanning..." : "Scan Ticket" }}
+      </button>
+
+      <p v-if="message" :class="messageType">{{ message }}</p>
     </div>
-  </template>
-  
-  <script>
-  export default {
-    data() {
-      return {
-        searchQuery: "",
-        tickets: [
-          { nomor: "TKT123", nama: "Rina", jenis: "VIP", tanggal: "2025-03-01", status: "Aktif" },
-          { nomor: "TKT124", nama: "Budi", jenis: "Reguler", tanggal: "2025-03-02", status: "Digunakan" },
-          { nomor: "TKT125", nama: "Siti", jenis: "VIP", tanggal: "2025-03-03", status: "Aktif" },
-        ],
-      };
+      </div>
+
+      
+      </div>
+    </template>
+    
+    <script>
+import axios from "axios";
+
+export default {
+  data() {
+    return {
+      tickets: [],
+      bookingCode: "",
+      message: "",
+      messageType: "",
+      loading: false,
+    };
+  },
+  methods: {
+    async scanTicket() {
+      if (!this.bookingCode) return;
+      
+      this.loading = true;
+      this.message = "";
+      
+      try {
+        const apiUrl = import.meta.env.VITE_API_BASE;
+        const response = await axios.post(`${apiUrl}/api/admin/tiket/manual-scanned`, {
+          bookingCode: this.bookingCode,
+        });
+
+        this.message = response.data.message;
+        this.messageType = "text-green-500";
+        
+      } catch (error) {
+        this.message = error.response?.data?.message || "Terjadi kesalahan!";
+        this.messageType = "text-red-500";
+      } finally {
+        this.loading = false;
+      }
     },
-    computed: {
-      filteredTickets() {
-        return this.tickets.filter(ticket => 
-          ticket.nama.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-          ticket.nomor.toLowerCase().includes(this.searchQuery.toLowerCase())
+  },
+  async mounted() {
+    try {
+      const apiUrl = import.meta.env.VITE_API_BASE;
+      const response = await axios.get(`${apiUrl}/api/admin/tiket/get-ticket-success`);
+      if (response.data.code === 200) {
+        this.tickets = response.data.data.flatMap((transaction) =>
+          transaction.tickets.map((ticket) => ({
+            email: transaction.user.email,
+            id: transaction.id, 
+            bookingCode : ticket.bookingCode,
+            scanned: ticket.isScanned,
+            ticketId: ticket.urlTicket ? ticket.urlTicket.ticketId : "-",
+          }))
         );
-      },
-    },
-    methods: {
-      editTicket(ticket) {
-        alert(`Edit tiket: ${ticket.nomor}`);
-      },
-      deleteTicket(index) {
-        if (confirm("Yakin ingin menghapus tiket ini?")) {
-          this.tickets.splice(index, 1);
-        }
-      },
-    },
-  };
-  </script>
-  
-  <style scoped>
-  .container {
-    max-width: 900px;
-    margin: auto;
-  }
-  </style>
-  
+      }
+    } catch (error) {
+      console.error("Error fetching tickets:", error);
+    }
+  },
+};
+</script>
+    
+    <style scoped>
+    .container {
+      max-width: 900px;
+      margin: auto;
+    }
+    </style>
+    
