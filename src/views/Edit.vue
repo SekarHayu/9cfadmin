@@ -1,22 +1,23 @@
 <template>
-  <div class="h-screen items-center w-screen md:w-screen mb-12 md:items-center md:justify-center sm:justify-center sm:p-32 pl-24 p-8 pb-24">
+  <div
+    class="h-screen items-center w-screen md:w-screen mb-12 md:items-center md:justify-center sm:justify-center sm:p-32 pl-24 p-8 pb-24">
     <div class="mb-4 md:mt-0 mt-4">
       <h1 class="text-2xl font-bold">Keterangan</h1>
-     <li class="italic">Untuk penulisan alias pada "Tambah Tiket", tulis dengan format jenis_tiket</li>
-     <li class="italic">Untuk penulisan harga pada "Tambah Tiket", tulis dengan format angka saja, misal 60000</li>
-     <li class="italic">Untuk melihat perubahan setelah melakukan klik pada button, silakan refresh</li>
+      <li class="italic">Untuk penulisan alias pada "Tambah Tiket", tulis dengan format jenis_tiket</li>
+      <li class="italic">Untuk penulisan harga pada "Tambah Tiket", tulis dengan format angka saja, misal 60000</li>
+      <li class="italic">Untuk melihat perubahan setelah melakukan klik pada button, silakan refresh</li>
     </div>
-    
+
 
     <h1 class="text-2xl font-bold mb-4">Daftar Jenis Tiket</h1>
-    
+
 
     <!-- TABEL TIKET -->
     <div class="overflow-x-auto mb-6">
       <table class="w-full border-collapse border text-sm md:text-base">
         <thead>
           <tr class="bg-gray-200">
-            <th class="border p-2">Ticket ID</th> 
+            <th class="border p-2">Ticket ID</th>
             <th class="border p-2">Nama Tiket</th>
             <th class="border p-2">Harga</th>
             <th class="border p-2">Status</th>
@@ -34,17 +35,12 @@
               </span>
             </td>
             <td class="border p-2">
-              <button 
-                @click="toggleStatus(ticket)"
-                class="px-4 py-2 text-white rounded mr-4"
-                :class="ticket.isReady ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'"
-              >
+              <button @click="toggleStatus(ticket)" class="px-4 py-2 text-white rounded mr-4"
+                :class="ticket.isReady ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'">
                 {{ ticket.isReady ? "Non-Aktifkan" : "Aktifkan" }}
               </button>
-              <button 
-                @click="deleteTicket(ticket.productId)"
-                class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
-              >
+              <button @click="deleteTicket(ticket.productId)"
+                class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">
                 Hapus
               </button>
             </td>
@@ -113,9 +109,9 @@ export default {
           newStatus
         });
 
-         if (response.status === 200) {
-      ticket.isReady = newStatus; // Langsung update di frontend
-    }
+        if (response.status === 200) {
+          ticket.isReady = newStatus; // Langsung update di frontend
+        }
       } catch (error) {
         console.error("Error updating ticket status:", error);
       }
@@ -124,7 +120,7 @@ export default {
       try {
         const response = await axios.post(`${this.apiUrl}/api/admin/tiket/add-ticket`, this.newTicket);
         alert(response.data.message); // Notifikasi sukses
-        
+
         this.newTicket = { alias: '', name: '', price: '' }; // Reset form
       } catch (error) {
         console.error("Error menambahkan tiket:", error);
@@ -152,7 +148,8 @@ table {
   width: 100%;
 }
 
-th, td {
+th,
+td {
   border: 1px solid #ddd;
   padding: 8px;
 }
