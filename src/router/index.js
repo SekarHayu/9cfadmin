@@ -17,16 +17,20 @@ const router = createRouter({
             component: () => import('../views/Ticket.vue')
         },
         {
-            path: '/edit',
-            component: () => import('../views/Edit.vue')
-        }, 
-        {
             path: '/settings',
             component: () => import('../views/Settings.vue')
         },
         {
             path: '/voucher',
             component: () => import('../views/voucher.vue')
+        },
+        {
+            path: '/form',
+            component: () => import('../views/Form.vue')
+        },
+        {
+            path: '/dokumen',
+            component: () => import('../views/Dokumen.vue')
         },
     ]
 })
