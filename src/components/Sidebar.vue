@@ -26,13 +26,17 @@
         <span class="material-icons">receipt</span>
         <span class="text">Data Tiket</span>
       </router-link>
-      <router-link class="button" to="/edit">
-        <span class="material-icons">edit</span>
-        <span class="text">Edit Tiket</span>
-      </router-link>
       <router-link class="button" to="/voucher">
         <span class="material-icons">confirmation_number</span>
         <span class="text">Edit Voucher</span>
+      </router-link>
+      <router-link class="button" to="/dokumen">
+                <span class="material-icons">checklist</span>
+                <span class="text">Verifikasi Dokumen</span>
+      </router-link>
+      <router-link class="button" to="/form">
+                <span class="material-icons">input</span>
+                <span class="text">Form Internal</span>
       </router-link>
     </div>
 
