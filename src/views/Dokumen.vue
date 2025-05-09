@@ -1,6 +1,6 @@
 <template>
     <div class="h-screen items-center w-screen md:w-screen md:items-center md:justify-center sm:justify-center sm:p-32 pl-24 p-8 pb-24">
-      <h1 class="text-2xl font-bold mb-4">Daftar Tiket Peserta</h1>
+      <h1 class="text-2xl font-bold mb-4">Daftar Dokumen Peserta</h1>
   
       <div class="overflow-x-auto">
         <table class="min-w-full table-auto border border-gray-300 rounded-lg overflow-hidden">
