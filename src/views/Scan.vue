@@ -1,21 +1,19 @@
 <template>
 <div class="h-screen items-center w-screen md:w-screen md:items-center md:justify-center sm:justify-center sm:pl-0 pl-16 pb-24"> 
   <div class="flex flex-col items-center justify-center h-screen bg-gray-100 ">
-    <!-- Judul tes-->
+    <!-- Judul-->
     <h2 class="text-3xl font-bold text-gray-800 mb-6">Scan QR Tiket</h2>
 
     <!-- Scanner Kamera -->
-    <div class="relative bg-white shadow-lg rounded-lg p-4 ">
-      <qrcode-stream
-        @decode="onDecode"
-        @init="onInit"
-        class="w-72 h-72 max-w-xs sm:max-w-md md:max-w-lg border-4 border-gray-300 rounded-lg"
-      />
-      <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <div class="w-16 h-16 border-4 border-red-500 rounded-md animate-pulse"></div>
-      </div>
+    <div class="scanner-container mx-4">
+      <div id="reader"></div>
+      <p class="text-center my-2">{{ resultMessage }}</p>
     </div>
 
+
+    <button @click="resetScanner" class="bg-green-500 text-white py-2 px-4 rounded-full font-semibold hover:bg-gray-800 transition">
+  Reset Scanner
+</button>
     <!-- Hasil Scan -->
     <p v-if="message" :class="messageClass" class="mt-6 text-lg font-semibold px-4 py-2 rounded-md shadow">
       {{ message }}
@@ -25,40 +23,86 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
-import { QrcodeStream } from "vue-qrcode-reader";
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import axios from "axios";
 
-const scannedData = ref("");
-const message = ref("");
-const messageClass = ref("");
+const resultMessage = ref('Arahkan kamera ke QR Code atau barcode...')
+const messageClass = ref('')
+const isProcessing = ref(false)
+let html5QrCode = null
+
 const apiUrl = import.meta.env.VITE_API_BASE;
 
-// Saat QR berhasil discan
-const onDecode = async (result) => {
-  scannedData.value = result;
-  message.value = "⏳ Memproses tiket...";
-  messageClass.value = "text-blue-600 bg-blue-100";
+async function startScanner() {
+  const { Html5Qrcode } = await import('html5-qrcode')
 
-  try {
-    const response = await axios.post(`${apiUrl}/api/admin/tiket/scan-ticket`, {
-      ticket: result,
-    });
-
-    message.value = `✅ ${response.data.message}`;
-    messageClass.value = "text-green-600 bg-green-100";
-  } catch (error) {
-    message.value = error.response?.data?.message || "❌ Terjadi kesalahan!";
-    messageClass.value = "text-red-600 bg-red-100";
+  if (html5QrCode) {
+    try {
+      await html5QrCode.stop()
+      await html5QrCode.clear()
+    } catch (e) {
+      console.warn("Gagal stop scanner sebelumnya:", e)
+    }
   }
-};
 
-// Saat kamera siap
-const onInit = async (promise) => {
-  try {
-    await promise;
-  } catch (error) {
-    console.error("Gagal akses kamera:", error);
+  html5QrCode = new Html5Qrcode("reader")
+
+  html5QrCode.start(
+    { facingMode: "environment" },
+    { fps: 10, qrbox: 250 },
+    async (decodedText) => {
+      if (isProcessing.value) return
+      isProcessing.value = true
+      resultMessage.value = "Memproses kode..."
+
+      try {
+        const apiUrl = import.meta.env.VITE_API_BASE;
+        const response = await axios.post(`${apiUrl}/api/admin/tiket/scan-ticket`, {
+          ticket: decodedText,
+        })
+
+        resultMessage.value = response.data.message
+        messageClass.value = "text-green-600 bg-green-100"
+      } catch (error) {
+        resultMessage.value = error.response?.data?.message || "❌ Terjadi kesalahan!"
+        messageClass.value = "text-red-600 bg-red-100"
+      } finally {
+        setTimeout(() => {
+          isProcessing.value = false
+          html5QrCode?.stop().then(() => html5QrCode.clear())
+        }, 2000)
+      }
+    },
+    (errorMessage) => {
+      // scanning error (bisa dikosongkan)
+    }
+  )
+}
+
+async function resetScanner() {
+  resultMessage.value = "Arahkan kamera ke QR Code atau barcode..."
+  messageClass.value = ""
+
+  if (html5QrCode) {
+    try {
+      await html5QrCode.stop()
+      await html5QrCode.clear()
+    } catch (e) {
+      console.warn("Scanner belum nyala atau sudah berhenti:", e.message)
+    }
   }
-};
+
+  startScanner()
+}
+
+
+onMounted(() => {
+  startScanner()
+})
+
+onBeforeUnmount(() => {
+  if (html5QrCode) {
+    html5QrCode.stop().then(() => html5QrCode.clear())
+  }
+})
 </script>
