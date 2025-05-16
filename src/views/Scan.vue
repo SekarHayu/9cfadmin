@@ -1,13 +1,14 @@
 <template>
 <div class="h-screen items-center w-screen md:w-screen md:items-center md:justify-center sm:justify-center sm:pl-0 pl-16 pb-24"> 
   <div class="flex flex-col items-center justify-center h-screen bg-gray-100 ">
-    <!-- Judul-->
+    <!-- Judul tes-->
     <h2 class="text-3xl font-bold text-gray-800 mb-6">Scan QR Tiket</h2>
 
     <!-- Scanner Kamera -->
     <div class="scanner-container mx-4">
       <div id="reader"></div>
-      <p class="text-center my-2">{{ resultMessage }}</p>
+      <p class="text-center mt-2 font-bold">{{ resultMessage }}</p>
+      <p class="text-center mb-2" v-if="scannedData"><strong>Ticket Type:</strong> {{ scannedData.ticket_type }}</p>
     </div>
 
 
@@ -26,6 +27,7 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import axios from "axios";
 
+const scannedData = ref(null)
 const resultMessage = ref('Arahkan kamera ke QR Code atau barcode...')
 const messageClass = ref('')
 const isProcessing = ref(false)
@@ -61,6 +63,7 @@ async function startScanner() {
           ticket: decodedText,
         })
 
+        scannedData.value = response.data.data
         resultMessage.value = response.data.message
         messageClass.value = "text-green-600 bg-green-100"
       } catch (error) {
@@ -82,6 +85,8 @@ async function startScanner() {
 async function resetScanner() {
   resultMessage.value = "Arahkan kamera ke QR Code atau barcode..."
   messageClass.value = ""
+  scannedData.value = null
+
 
   if (html5QrCode) {
     try {
