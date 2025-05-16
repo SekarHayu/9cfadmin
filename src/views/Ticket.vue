@@ -1,32 +1,7 @@
   <template>
       <div class="h-screen items-center w-screen md:w-screen md:items-center md:justify-center sm:justify-center sm:p-32 pl-24 p-8 pb-24  "> 
-        <h1 class="text-2xl font-bold mb-4">Daftar Tiket Peserta</h1>
-    
-        
-    
-        <div class="overflow-x-auto">
-          <table class="w-full border-collapse border text-sm md:text-base">
-            <thead>
-              <tr class="bg-gray-100">
-          <th class="border p-2">Email</th>
-          <th class="border p-2">ID</th>
-          <th class="border p-2">Booking Code</th>
-          <th class="border p-2">Scanned</th>
-          <th class="border p-2">Ticket ID</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="ticket in tickets" :key="ticket.id">
-          <td class="border p-2">{{ ticket.email }}</td>
-          <td class="border p-2">{{ ticket.id }}</td>
-          <td class="border p-2">{{ ticket.bookingCode }}</td>
-          <td class="border p-2">{{ ticket.scanned ? '✅' : '❌' }}</td>
-          <td class="border p-2">{{ ticket.ticketId }}</td>
-        </tr>
-      </tbody>
-        </table>
 
-        <h1 class="text-2xl pt-12 font-bold mb-4">Manual Ticket Scan</h1>
+        <h1 class="text-2xl font-bold mb-4">Manual Ticket Scan</h1>
     
     <div class="bg-white p-6 rounded-lg shadow-md md:w-96">
       <input 
@@ -46,6 +21,38 @@
 
       <p v-if="message" :class="messageType">{{ message }}</p>
     </div>
+        <h1 class="text-2xl pt-12 font-bold mb-4">Daftar Tiket Peserta</h1>
+    
+        
+        <input
+          type="text"
+          v-model="searchEmail"
+          placeholder="Cari berdasarkan email..."
+          class="border p-2 rounded mb-4 w-full md:w-96"
+        />
+        <div class="overflow-x-auto">
+          <table class="w-full border-collapse border mb-4 text-sm md:text-base">
+            <thead>
+              <tr class="bg-gray-100">
+          <th class="border p-2">Email</th>
+          <th class="border p-2">ID</th>
+          <th class="border p-2">Booking Code</th>
+          <th class="border p-2">Scanned</th>
+          <th class="border p-2">Ticket ID</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="ticket in filteredTickets" :key="ticket.id">
+          <td class="border p-2">{{ ticket.email }}</td>
+          <td class="border p-2">{{ ticket.id }}</td>
+          <td class="border p-2">{{ ticket.bookingCode }}</td>
+          <td class="border p-2">{{ ticket.scanned ? '✅' : '❌' }}</td>
+          <td class="border p-2">{{ ticket.ticketId }}</td>
+        </tr>
+      </tbody>
+        </table>
+
+        
       </div>
 
       
@@ -63,6 +70,7 @@ export default {
       message: "",
       messageType: "",
       loading: false,
+      searchEmail: "", 
     };
   },
   methods: {
@@ -107,7 +115,15 @@ export default {
     } catch (error) {
       console.error("Error fetching tickets:", error);
     }
+    
   },
+  computed: {
+  filteredTickets() {
+    return this.tickets.filter(ticket =>
+      ticket.email.toLowerCase().includes(this.searchEmail.toLowerCase())
+    );
+  }
+}
 };
 </script>
     
